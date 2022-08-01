@@ -1,0 +1,183 @@
+name: hips-cdp/hips-cdp CD
+on:
+  workflow_dispatch:
+#   # workflow_dispatch only supports string, boolean, environment, and choice inputs
+#   name: userSubscriptions
+#   type: object
+#   default:
+#     dev:
+#       subscriptionId: b012704c-e3f6-4ad9-8a86-9b3aa9ffe21b
+#       serviceConnection: azure-hips-cdp-dev
+#       templateConfigs:
+#         aks-vmss:
+#           eastus2:
+#             group:
+#               templateParameters: engineerADGroupPrincipalId=7e252e01-75d2-44a4-baed-eeea715784c1 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c logWorkspacesName=app-log-analytics-eastus2-sttu2yxqow6r6 existingVirtualNetworkName=vnet-hips-cdp-dev-eastus2 dnsServiceIP=100.64.0.20 keyEncryptionKeyURL='${{ env.aks_disk_encryption_key_url_dev }}' environment=dev
+#         app-services:
+#               templateParameters: environment=dev
+#         cosmos-db:
+#               templateParameters: cosmosDbName=cosmos-hips-db existingVirtualNetworkName=vnet-hips-cdp-dev-eastus2 environment=dev
+#         redis:
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-dev-eastus2 storageAccountKey='${{ env.storageAccountKeyDev }}' environment=dev
+#         sql-pool-db:
+#               templateParameters: adminUsername=${{ env.sql_db_user }} adminPassword=${{ env.sql_db_pass }}                     tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c  adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adAdminEmail=sharmak@mskcc.org dbname=cdprpi existingVirtualNetworkName=vnet-hips-cdp-dev-eastus2 keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_dev }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_dev }} environment=dev
+#         sql-hyper-db:
+#               templateParameters: adminUsername=${{ env.sql_db_user }} adminPassword=${{ env.sql_db_pass }} tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c  adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adAdminEmail=sharmak@mskcc.org    dbname=cdphyps   existingVirtualNetworkName=vnet-hips-cdp-dev-eastus2 keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_dev }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_dev }} environment=dev
+#         alerts:
+#         dns-alerts:
+#         vm-windows:
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url }}' virtualNetworkName="vnet-hips-cdp-dev-eastus2" virtualNetworkResourceGroup="networking-spoke-eastus2" vmAZVmServerName="AzMSKdhips" vmAZVMServerAdminPassword='${{ env.vm_admin_password }}' additionalDiskName=rgidevrpinode vmPatchphase='Phase 1_Saturday_0000_None'  environment=dev
+#         vm-linux:
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url }}' virtualNetworkName="vnet-hips-cdp-dev-eastus2" virtualNetworkResourceGroup="networking-spoke-eastus2" vmAZVmServerName="azmskdhips0" vmAZVMServerAdminPassword='${{ env.vm_admin_password }}' environment=dev
+#         key-vault:
+#               templateParameters: engineerADGroupPrincipalId=7e252e01-75d2-44a4-baed-eeea715784c1 logWorkspacesName=app-log-analytics-eastus2-sttu2yxqow6r6 servicePrincipleDevOps=7de42fce-a6d0-458c-8d2e-406798a11153 pooldbname=cdprpi hyperdbname=cdphyps environment=dev
+#         service-bus:
+#               templateParameters: skuTierName=Premium existingVirtualNetworkName=vnet-hips-cdp-dev-eastus2 environment=dev
+#         vm-load-balancer:
+#         data-lake:
+#               templateParameters: existingVirtualNetworkName="vnet-hips-cdp-dev-eastus2" dataLakeSAName=datalake environment=dev
+#         storage:
+#               templateParameters: storageAccounts_name=dev01 environment=dev
+#         maps:
+#           eastus:
+#     test:
+#       subscriptionId: ab0abd70-dda9-4da1-8550-9d30a80e0f2d
+#       serviceConnection: azure-hips-cdp-test
+#               templateParameters: engineerADGroupPrincipalId=13b21308-7a6d-42f5-bae8-d9fa42df8501 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c logWorkspacesName=app-log-analytics-eastus2-w6oebtt5ql2ku existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 dnsServiceIP=100.64.0.30 keyEncryptionKeyURL='${{ env.aks_disk_encryption_key_url_test }}' environment=test
+#               templateParameters: environment=test
+#               templateParameters: cosmosDbName=cosmos-hips-db-t existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 environment=test
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 storageAccountKey='${{ env.storageAccountKeyTest }}' environment=test
+#               templateParameters: adAdminEmail=sharmak@mskcc.org adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adminPassword=${{ env.sql_db_pass }}                     adminUsername=${{ env.sql_db_user }} dbname=cdprpit existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_test }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_test }} environment=test
+#               templateParameters: adAdminEmail=sharmak@mskcc.org   adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adminPassword=${{ env.sql_db_pass }} adminUsername=${{ env.sql_db_user }} dbname=cdphypst existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_test }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_test }} environment=test
+#               templateParameters: 'fileUris=''${{ env.vm_configuration_key_uri }}'' keyEncryptionKeyURL=''${{ env.disk_encryption_key_url_test }}'' virtualNetworkName=vnet-hips-cdp-test-eastus2 virtualNetworkResourceGroup=networking-spoke-eastus2 vmAZVmServerName=AzMSKthips vmAZVMServerAdminPassword=''${{ env.vm_admin_password }}'' additionalDiskName=rgidisknode vmPatchphase=''Phase 1_Sunday_0900_None''  environment=test                 '
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url_test }}' virtualNetworkName=vnet-hips-cdp-test-eastus2 virtualNetworkResourceGroup=networking-spoke-eastus2 vmAZVmServerName=azmskthips0 vmAZVMServerAdminPassword='${{ env.vm_admin_password }}' environment=test
+#               templateParameters: engineerADGroupPrincipalId=13b21308-7a6d-42f5-bae8-d9fa42df8501 logWorkspacesName=app-log-analytics-eastus2-w6oebtt5ql2ku servicePrincipleDevOps=7de42fce-a6d0-458c-8d2e-406798a11153 pooldbname=cdprpit hyperdbname=cdphypst environment=test
+#               templateParameters: skuTierName=Premium existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 environment=test
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-test-eastus2 dataLakeSAName=datalake environment=test
+#               templateParameters: storageAccounts_name=test01 environment=test
+#     preprod:
+#       subscriptionId: 2f5c9f31-2ae0-4044-b8f2-c0e20eeeb83e
+#       serviceConnection: azure-hips-cdp-preprod
+#               templateParameters: engineerADGroupPrincipalId=f65b27be-51b7-416a-9fde-847fea6546eb tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c logWorkspacesName=app-log-analytics-eastus2-rl5cemakajfpc existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 dnsServiceIP=100.64.0.60 keyEncryptionKeyURL='${{ env.aks_disk_encryption_key_url_preprod }}' environment=preprod
+#               templateParameters: environment=preprod existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 privateDnsZonesName=redpoint.preprod.azure.mskcc.org REDACTED
+#               templateParameters: cosmosDbName=cosmos-hips-db-prep existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 environment=preprod
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 storageAccountKey='${{ env.storageAccountKeyPreprod }}' environment=preprod
+#               templateParameters: adAdminEmail=sharmak@mskcc.org adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adminPassword=${{ env.sql_db_pass }}                     adminUsername=${{ env.sql_db_user }} dbname=cdprpis existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_preprod }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_preprod }} environment=preprod
+#               templateParameters: adAdminEmail=sharmak@mskcc.org   adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adminPassword=${{ env.sql_db_pass }} adminUsername=${{ env.sql_db_user }} dbname=cdphypss existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_preprod }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_preprod }} environment=preprod
+#               templateParameters: keyvaultname=kv-sc-l2r5n62jaa7l2 Rediscachename=hips-cdp-preprod sqlServer_id=cdprpis serviceUri_name='${{ env.serviceUri_name }}' sqlDB1_name=Interaction_PreProd sqlDB2_name=InteractionAudit_PreProd serviceBusName=plan-hips-cdp-preprod appService_rgi_id=realtimeservices-preprod serverFarms_rgi_id=realtimeservices-preprod-plan storageAccounts_cdprpitlog_id=cdprpislogjnrh3hnc3s3t2 storageAccounts_cdphypstlog_id=cdphypsslogjnrh3hnc3s3t2 environment=preprod
+#               templateParameters: privateDnsZoneName=redpoint.preprod.azure.mskcc.org actionGroup_id=hips-cdp-basic-AG environment=preprod
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url_preprod }}' virtualNetworkName=vnet-hips-cdp-preprod-eastus2 virtualNetworkResourceGroup=networking-spoke-eastus2 vmAZVmServerName=azmskuhips vmAZVMServerAdminPassword='${{ env.vm_admin_password }}' additionalDiskName=rgidisknode vmPatchphase='Phase 2_Saturday_0900_None' environment=preprod
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url_preprod }}' virtualNetworkName=vnet-hips-cdp-preprod-eastus2 virtualNetworkResourceGroup=networking-spoke-eastus2 vmAZVmServerName=azmskships0 vmAZVMServerAdminPassword='${{ env.vm_admin_password }}' environment=preprod
+#               templateParameters: engineerADGroupPrincipalId=f65b27be-51b7-416a-9fde-847fea6546eb logWorkspacesName=app-log-analytics-eastus2-rl5cemakajfpc servicePrincipleDevOps=7de42fce-a6d0-458c-8d2e-406798a11153 pooldbname=cdprpis hyperdbname=cdphypss environment=preprod
+#               templateParameters: skuTierName=Premium existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 environment=preprod
+#               templateParameters: privateDnsZonesName=redpoint.preprod.azure.mskcc.org loadBalancerPrivateIP=10.2.7.71 targetVM1=AzMSKuhips1 targetVM2=AzMSKuhips2 workspaceName=app-log-analytics-eastus2-rl5cemakajfpc virtualNetworkName=vnet-hips-cdp-preprod-eastus2 loadBalancerName=hipspreprodlb environment=preprod
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-preprod-eastus2 dataLakeSAName=datalake environment=preprod
+#               templateParameters: storageAccounts_name=prep01 environment=preprod
+#               templateParameters: environment=preprod
+#     prod:
+#       subscriptionId: e1e8bb9a-2efe-4a12-bbd1-1e764421229d
+#       serviceConnection: azure-hips-cdp-prod
+#               templateParameters: engineerADGroupPrincipalId=42907c92-0cee-4667-b44d-98c7547e5ad8 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c logWorkspacesName=app-log-analytics-eastus2-ymxt7sbis6fac existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 dnsServiceIP=100.64.0.80 keyEncryptionKeyURL='${{ env.aks_disk_encryption_key_url_prod }}' environment=prod
+#               templateParameters: 'environment=prod existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 privateDnsZonesName=redpoint.azure.mskcc.org REDACTED '
+#               templateParameters: cosmosDbName=cosmos-hips-db-prod existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 environment=prod
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 storageAccountKey='${{ env.storageAccountKeyProd }}' environment=prod
+#               templateParameters: adAdminEmail=sharmak@mskcc.org adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adminPassword=${{ env.sql_db_prod_pass }}                     adminUsername=${{ env.sql_db_user }} dbname=cdprpip existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_prod }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_prod }} environment=prod
+#               templateParameters: adAdminEmail=sharmak@mskcc.org   adAdminObjectId=c46607bb-4805-41c7-ba7f-abd04843084b adminPassword=${{ env.sql_db_prod_pass }} adminUsername=${{ env.sql_db_user }} dbname=cdphypsp existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 tenantID=93c5fcb5-2df6-4550-9a10-cd35f285cf7c keyEncryptionKeyURL='${{ env.sql_disk_encryption_key_url_prod }}' keyVaultVersion=${{ env.sql_disk_encryption_key_version_prod }} environment=prod
+#               templateParameters: keyvaultname=kv-sc-t2asvyx3g5mio Rediscachename=hips-cdp-prod sqlServer_id=cdprpip serviceUri_name='${{ env.serviceUri_name }}' sqlDB1_name=Interaction_Prod sqlDB2_name=InteractionAudit_Prod serviceBusName=plan-hips-cdp-prod appService_rgi_id=realtimeservices-prod serverFarms_rgi_id=realtimeservices-prod-plan storageAccounts_cdprpitlog_id=cdprpiploga4u4maihquh6i storageAccounts_cdphypstlog_id=cdphypsploga4u4maihquh6i environment=prod
+#               templateParameters: privateDnsZoneName=redpoint.azure.mskcc.org actionGroup_id=hips-cdp-basic-AG environment=prod
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url_prod }}' virtualNetworkName=vnet-hips-cdp-prod-eastus2 virtualNetworkResourceGroup=networking-spoke-eastus2 vmAZVmServerName=azmskphips vmAZVMServerAdminPassword='${{ env.vm_admin_prod_password }}' additionalDiskName=rgidisknode vmPatchphase='Phase 3_Sunday_0400_None' environment=prod
+#               templateParameters: fileUris='${{ env.vm_configuration_key_uri }}' keyEncryptionKeyURL='${{ env.disk_encryption_key_url_prod }}' virtualNetworkName=vnet-hips-cdp-prod-eastus2 virtualNetworkResourceGroup=networking-spoke-eastus2 vmAZVmServerName=azmskphips0 vmAZVMServerAdminPassword='${{ env.vm_admin_prod_password }}' environment=prod
+#               templateParameters: engineerADGroupPrincipalId=42907c92-0cee-4667-b44d-98c7547e5ad8 logWorkspacesName=app-log-analytics-eastus2-ymxt7sbis6fac servicePrincipleDevOps=7de42fce-a6d0-458c-8d2e-406798a11153 pooldbname=cdprpip hyperdbname=cdphypsp environment=prod
+#               templateParameters: skuTierName=Premium existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 environment=prod
+#               templateParameters: privateDnsZonesName=redpoint.azure.mskcc.org loadBalancerPrivateIP=10.2.6.71 targetVM1=AzMSKphips1 targetVM2=AzMSKphips2 workspaceName=app-log-analytics-eastus2-ymxt7sbis6fac virtualNetworkName=vnet-hips-cdp-prod-eastus2 loadBalancerName=hipsprodlb environment=prod
+#               templateParameters: existingVirtualNetworkName=vnet-hips-cdp-prod-eastus2 dataLakeSAName=datalake environment=prod
+#               templateParameters: storageAccounts_name=prod01 environment=prod
+#               templateParameters: environment=prod
+  push:
+    branches:
+    - preview
+env:
+  alert_receiver_email: mailscan@mskcc.org
+  isMain: "$[eq(variables['Build.SourceBranch'], 'refs/heads/master')]"
+  serviceUri_name: https://forward-monitor-alerts.azurewebsites.net/api/HttpTrigger1?REDACTED
+jobs:
+  ci_cd_jobs_deploy_platform:
+    name: ci_cd_jobs_deploy_platform
+    needs:
+    - ci_cd_jobs_deploy_platform
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: true
+      targetEnv: main_dryrun
+      serviceConnection: "${{ parameters.userSubscriptions.dev.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.dev }}"'
+  ci_cd_jobs_deploy_platform_2:
+    name: ci_cd_jobs_deploy_platform_2
+    needs:
+    - ci_cd_jobs_deploy_platform_2
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: false
+      targetEnv: main
+      serviceConnection: "${{ parameters.userSubscriptions.dev.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.dev }}"'
+  ci_cd_jobs_deploy_platform_3:
+    name: ci_cd_jobs_deploy_platform_3
+    needs:
+    - ci_cd_jobs_deploy_platform_3
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: true
+      targetEnv: main_dryrun
+      serviceConnection: "${{ parameters.userSubscriptions.test.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.test }}"'
+  ci_cd_jobs_deploy_platform_4:
+    name: ci_cd_jobs_deploy_platform_4
+    needs:
+    - ci_cd_jobs_deploy_platform_4
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: false
+      targetEnv: main
+      serviceConnection: "${{ parameters.userSubscriptions.test.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.test }}"'
+  ci_cd_jobs_deploy_platform_5:
+    name: ci_cd_jobs_deploy_platform_5
+    needs:
+    - ci_cd_jobs_deploy_platform_5
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: true
+      targetEnv: main_dryrun
+      serviceConnection: "${{ parameters.userSubscriptions.preprod.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.preprod }}"'
+  ci_cd_jobs_deploy_platform_6:
+    name: ci_cd_jobs_deploy_platform_6
+    needs:
+    - ci_cd_jobs_deploy_platform_6
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: false
+      targetEnv: main
+      serviceConnection: "${{ parameters.userSubscriptions.preprod.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.preprod }}"'
+  ci_cd_jobs_deploy_platform_7:
+    name: ci_cd_jobs_deploy_platform_7
+    needs:
+    - ci_cd_jobs_deploy_platform_7
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: true
+      targetEnv: main_dryrun
+      serviceConnection: "${{ parameters.userSubscriptions.prod.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.prod }}"'
+  ci_cd_jobs_deploy_platform_8:
+    name: ci_cd_jobs_deploy_platform_8
+    needs:
+    - ci_cd_jobs_deploy_platform_8
+    uses: "./.github/workflows/ci_cd_jobs_deploy_platform.yml"
+    with:
+      dryRun: false
+      targetEnv: infra_prod
+      serviceConnection: "${{ parameters.userSubscriptions.prod.serviceConnection }}"
+      userSubscriptions: '"${{ parameters.userSubscriptions.prod }}"'
