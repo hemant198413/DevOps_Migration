@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        // Placeholder value needs to be present for validation
+        "engineerADGroupPrincipalId": {
+            "value": "13b21308-7a6d-42f5-bae8-d9fa42df8501"
+        },
+        "logWorkspacesName": {
+            "value": "place_holder_logWorkspacesName"
+        },
+        "managedIdentityName": {
+            "value": "hips-cdp-app-managed-identity"
+        },
+        "environment": {
+            "value": "dev"
+        },
+        "resourcetags": {
+            "value": {
+                "applicationid": "hips",
+                "application": "hips-cdp",
+                "costcenter": "96200",
+                "env": "[parameters('environment')]",
+                "owneremail": "",
+                "service": "hips-cdp",
+                "version": "V1.1"
+            }
+        },
+        "servicePrincipleDevOps": {
+            "value": "place_holder_servicePrincipleDevOps"
+        },
+        "diskEncryptionSets": {
+            "value": "aks-disk-encryption-set"
+        },
+        "pooldbname": {
+            "value": "place_holder_pooldbname"
+        },
+        "hyperdbname": {
+            "value": "place_holder_hyperdbname"
+        }
+    }
+}

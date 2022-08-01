@@ -1,0 +1,311 @@
+parameters:
+  - name: dryRun
+    type: boolean
+  - name: targetEnv
+    type: string
+    values:
+      - main
+      - main_dryrun
+      - infra_prod
+      - local_trigger
+  - name: serviceConnection
+    type: string
+  - name: userSubscriptions
+    type: object
+
+jobs:
+  - deployment: storage
+    displayName: 'Azure Storage Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                  componentDetails:
+                    components:
+                    - name: storage
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                  dryRun: ${{ parameters.dryRun }}
+                  serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: service_bus
+    displayName: 'Service Bus Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: service-bus
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: redis_cache
+    displayName: 'Redis Cache deployment Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: redis
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: sqlserver_deployment
+    displayName: 'Sql Server Pool and HyperScale Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: sql-pool-db
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                    - name: sql-hyper-db
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: web_app
+    displayName: 'App Service Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: app-services
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: key_vault
+    displayName: 'Key Vault Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: key-vault
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: data_lake_Gen2_storage
+    displayName: 'DataLake Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: data-lake
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: alerts
+    displayName: 'Alerts and ActionGroup Deployment'
+    environment: ${{ parameters.targetEnv }}
+    dependsOn:
+      #- aks
+      #- cosmos_db
+      - service_bus
+      - redis_cache      
+      - sqlserver_deployment
+      - key_vault
+      - web_app
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: alerts
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: alerts_dnszone
+    displayName: 'dns Alerts and ActionGroup Deployment'
+    environment: ${{ parameters.targetEnv }}
+    dependsOn:
+      - alerts
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: dns-alerts
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: dns-spoke
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  # - deployment: windows_vm
+  #   displayName: 'Windows VM Deployment'
+  #   environment: ${{ parameters.targetEnv }}
+  #   dependsOn: key_vault
+  #   strategy:
+  #     runOnce:
+  #       deploy:
+  #         steps:
+  #           - template: ../steps/deploy-arm-template.yml
+  #             parameters:
+  #               componentDetails:
+  #                 components:
+  #                   - name: vm-windows
+  #                     scope: Resource Group
+  #                     instances:
+  #                       - ${{ parameters.userSubscriptions }}
+  #                     mode: Incremental
+  #                     region: eastus2
+  #                     target: hips-cdp-eastus2
+  #                     componentFolder: infra
+  #               dryRun: ${{ parameters.dryRun }}
+  #               serviceConnection: ${{ parameters.serviceConnection }}
+  # - deployment: Linux_vm
+  #   displayName: 'Linux VM Deployment'
+  #   environment: ${{ parameters.targetEnv }}
+  #   dependsOn: key_vault
+  #   strategy:
+  #     runOnce:
+  #       deploy:
+  #         steps:
+  #           - template: ../steps/deploy-arm-template.yml
+  #             parameters:
+  #               componentDetails:
+  #                 components:
+  #                   - name: vm-linux
+  #                     scope: Resource Group
+  #                     instances:
+  #                       - ${{ parameters.userSubscriptions }}
+  #                     mode: Incremental
+  #                     region: eastus2
+  #                     target: hips-cdp-eastus2
+  #                     componentFolder: infra
+  #               dryRun: ${{ parameters.dryRun }}
+  #               serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: load_balancer # enabled only for Preprod and Prod deployment
+    displayName: 'Load Balancer Deployment'
+    environment: ${{ parameters.targetEnv }}
+    #dependsOn:
+      #- windows_vm
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: vm-load-balancer
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus2
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}
+  - deployment: azure_maps
+    displayName: 'Maps Deployment'
+    environment: ${{ parameters.targetEnv }}
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+            - template: ../steps/deploy-arm-template.yml
+              parameters:
+                componentDetails:
+                  components:
+                    - name: maps
+                      scope: Resource Group
+                      instances:
+                        - ${{ parameters.userSubscriptions }}
+                      mode: Incremental
+                      region: eastus
+                      target: hips-cdp-eastus2
+                      componentFolder: infra
+                dryRun: ${{ parameters.dryRun }}
+                serviceConnection: ${{ parameters.serviceConnection }}

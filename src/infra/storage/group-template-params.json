@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "environment": {
+            "value": "dev"
+        },
+        "resourcetags": {
+            "value": {
+                "applicationid": "hips",
+                "application": "hips-cdp",
+                "costcenter": "96200",
+                "env": "[parameters('environment')]",
+                "owneremail": "",
+                "service": "hips-cdp",
+                "version": "V1.1"
+            }
+        },
+        "storageAccounts_name": {
+            "Value": "demo"
+        }
+    }
+}

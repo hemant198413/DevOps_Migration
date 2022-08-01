@@ -1,0 +1,358 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "engineerADGroupPrincipalId": {
+            "type": "string"
+        },
+        "managedIdentityName": {
+            "type": "String"
+        },
+        "keyVaultAdminObjectId": {
+            "type": "string",
+            "defaultValue": "bac0b4c4-2b27-47c8-89e5-34c2f8d4aa7e"
+        },
+        "keyVaultName": {
+            "type": "string",
+            "defaultValue": "[concat('kv-sc-',uniqueString(resourceGroup().id))]"
+        },
+        "keyVaultSoftDeleteRetentionDays": {
+            "type": "int",
+            "defaultValue": 90
+        },
+        "logWorkspacesName": {
+            "type": "string"
+        },
+        "resourcetags": {
+            "type": "object"
+        },
+        "environment": {
+            "type": "String"
+        },
+        "servicePrincipleDevOps": {
+            "type": "string"
+        },
+        "diskEncryptionSets": {
+            "type": "string"
+        },
+        "pooldbname": {
+            "type": "string"
+        },
+        "hyperdbname": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "kvDiagnosticSettingName": "[concat(parameters('keyVaultName'),'-diag-setting')]",
+        "location": "eastus2",
+        "loggingResourceGroup": "[concat('logging-monitoring-spoke-', variables('location'))]",
+        "managedIdentityId": "[resourceId(subscription().subscriptionId,resourceGroup().name,'Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('managedIdentityName'))]",
+        "diskEncryptionSetId": "[resourceId(subscription().subscriptionId,resourceGroup().name,'Microsoft.Compute/diskEncryptionSets/',parameters('diskEncryptionSets'))]",
+        "poolSqlServerVaultResourceID": "[resourceId(subscription().subscriptionId,resourceGroup().name, 'Microsoft.Sql/servers',parameters('pooldbname'))]",
+        "hyperSqlServerVaultResourceID": "[resourceId(subscription().subscriptionId,resourceGroup().name, 'Microsoft.Sql/servers',parameters('hyperdbname'))]",
+        "backupManagementServiceObjectId": "7506d3f4-63b1-4a58-bebe-6be8ae6ee58c"        
+    },
+    "resources": [
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [],
+            "tags": {
+                "cost-center": "[parameters('resourcetags').costcenter]",
+                "owner-email": "[parameters('resourcetags').owneremail]",
+                "application": "[parameters('resourcetags').application]",
+                "application-id": "[parameters('resourcetags').applicationid]",
+                "env": "[parameters('resourcetags').env]",
+                "version": "[parameters('resourcetags').version]",
+                "service": "[parameters('resourcetags').service]",
+                "resource-name": "[concat(parameters('keyVaultName'),'.microsoft.keyVault-vaults')]"
+            },
+            "properties": {
+                "enabledForDeployment": false,
+                "enabledForTemplateDeployment": true,
+                "enabledForDiskEncryption": true,
+                "enablePurgeProtection": true,
+                "enableRbacAuthorization": false,
+                "enableSoftDelete": true,
+                "accessPolicies": [],
+                "createMode": "recover",
+                "tenantId": "[subscription().tenantId]",
+                "sku": {
+                    "name": "Standard",
+                    "family": "A"
+                },
+                "softDeleteRetentionInDays": "[parameters('keyVaultSoftDeleteRetentionDays')]"
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/accessPolicies",
+            "apiVersion": "2019-09-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+                "[resourceId('Microsoft.Compute/diskEncryptionSets', parameters('diskEncryptionSets'))]"
+            ],
+            "name": "[concat(parameters('keyVaultName'),'/add')]",
+            "properties": {
+                "accessPolicies": [
+                    {
+                        "objectId": "[parameters('keyVaultAdminObjectId')]",
+                        "tenantId": "[subscription().tenantId]",
+                        "permissions": {
+                            "keys": [
+                                "Get",
+                                "List",
+                                "Update",
+                                "Create",
+                                "Import",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "secrets": [
+                                "Get",
+                                "List",
+                                "Set",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "certificates": [
+                                "Get",
+                                "List",
+                                "Update",
+                                "Create",
+                                "Import",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore",
+                                "ManageContacts",
+                                "ManageIssuers",
+                                "GetIssuers",
+                                "ListIssuers",
+                                "SetIssuers",
+                                "DeleteIssuers"
+                            ]
+                        }
+                    },
+                    {
+                        "objectId": "[reference(variables('managedIdentityId'), '2018-11-30', 'Full').properties.principalId]",
+                        "tenantId": "[subscription().tenantId]",
+                        "permissions": {
+                            "keys": [
+                                "Get",
+                                "List",
+                                "Decrypt",
+                                "Encrypt",
+                                "Update",
+                                "Create",
+                                "Delete",
+                                "Import"
+                            ],
+                            "secrets": [
+                                "Get",
+                                "List",
+                                "Set",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "certificates": [
+                                "Create",
+                                "Delete",
+                                "Get",
+                                "GetIssuers",
+                                "Import",
+                                "List",
+                                "ListIssuers",
+                                "SetIssuers",
+                                "Update"
+                            ]
+                        }
+                    },
+                    {
+                        "objectId": "[parameters('engineerADGroupPrincipalId')]",
+                        "tenantId": "[subscription().tenantId]",
+                        "permissions": {
+                            "keys": [
+                                "Get",
+                                "List",
+                                "Decrypt",
+                                "Encrypt",
+                                "Update",
+                                "Create",
+                                "Delete",
+                                "Import"
+                            ],
+                            "secrets": [
+                                "Get",
+                                "List",
+                                "Set",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "certificates": [
+                                "Create",
+                                "Delete",
+                                "Get",
+                                "GetIssuers",
+                                "Import",
+                                "List",
+                                "ListIssuers",
+                                "SetIssuers",
+                                "Update"
+                            ]
+                        }
+                    },
+                    {
+                        "objectId": "[parameters('servicePrincipleDevOps')]",
+                        "tenantId": "[subscription().tenantId]",
+                        "permissions": {
+                            "keys": [
+                                "Get",
+                                "List",
+                                "Decrypt",
+                                "Encrypt",
+                                "Update",
+                                "Create",
+                                "Delete",
+                                "Import"
+                            ],
+                            "secrets": [
+                                "Get",
+                                "List",
+                                "Set",
+                                "Delete",
+                                "Recover",
+                                "Backup",
+                                "Restore"
+                            ],
+                            "certificates": [
+                                "Create",
+                                "Delete",
+                                "Get",
+                                "GetIssuers",
+                                "Import",
+                                "List",
+                                "ListIssuers",
+                                "SetIssuers",
+                                "Update"
+                            ]
+                        }
+                    },
+                    {
+                        "tenantId": "[subscription().tenantid]",
+                        "objectId": "[reference(variables('diskEncryptionSetId'), '2020-09-30', 'Full').identity.principalId]",
+                        "permissions": {
+                            "keys": [
+                                "wrapkey",
+                                "unwrapkey",
+                                "get"
+                            ],
+                            "secrets": [],
+                            "certificates": []
+                        }
+                    },
+                    {
+                        "tenantId": "[subscription().tenantid]",
+                        "objectId": "[reference(variables('poolSqlServerVaultResourceID'), '2020-11-01-preview', 'Full').identity.principalId]",
+                        "permissions": {
+                            "keys": [
+                                "wrapkey",
+                                "unwrapkey",
+                                "get"
+                            ],
+                            "secrets": [],
+                            "certificates": []
+                        }
+                    },
+                    {
+                        "tenantId": "[subscription().tenantid]",
+                        "objectId": "[reference(variables('hyperSqlServerVaultResourceID'), '2020-11-01-preview', 'Full').identity.principalId]",
+                        "permissions": {
+                            "keys": [
+                                "wrapkey",
+                                "unwrapkey",
+                                "get"
+                            ],
+                            "secrets": [],
+                            "certificates": []
+                        }
+                    },
+                    {
+                        "tenantId": "[subscription().tenantid]",
+                        "objectId": "[variables('backupManagementServiceObjectId')]",
+                        "permissions": {
+                            "keys": [
+                                "get",
+                                "list",
+                                "backup"
+                            ],
+                            "secrets": [
+                                "get",
+                                "list",
+                                "backup"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults/providers/diagnosticSettings",
+            "apiVersion": "2017-05-01-preview",
+            "name": "[concat(parameters('keyVaultName'), '/Microsoft.Insights/', variables('kvDiagnosticSettingName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "properties": {
+                "workSpaceId": "[resourceId(variables('loggingResourceGroup'), 'microsoft.operationalinsights/workspaces', parameters('logWorkspacesName'))]",
+                "logs": [
+                    {
+                        "category": "AuditEvent",
+                        "enabled": true
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Compute/diskEncryptionSets",
+            "apiVersion": "2020-09-30",
+            "name": "[parameters('diskEncryptionSets')]",
+            "location": "eastus2",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            ],
+            "tags": {
+                "cost-center": "[parameters('resourcetags').costcenter]",
+                "owner-email": "[parameters('resourcetags').owneremail]",
+                "application": "[parameters('resourcetags').application]",
+                "application-id": "[parameters('resourcetags').applicationid]",
+                "env": "[parameters('resourcetags').env]",
+                "version": "[parameters('resourcetags').version]",
+                "service": "[parameters('resourcetags').service]",
+                "resource-name": "[concat(parameters('diskEncryptionSets'),'.disk-encryption-sets')]"
+            },
+            "properties": {
+                "activeKey": {
+                    "sourceVault": {
+                        "id":  "[resourceId('Microsoft.KeyVault/vaults',parameters('keyVaultName'))]"
+                    },
+                    "keyUrl": "[reference(resourceId('Microsoft.KeyVault/vaults/keys',parameters('keyVaultName'),'hips-aks-disk-encryption-key'), '2019-09-01', 'Full').properties.keyUriWithVersion]"
+                },
+                "encryptionType": "EncryptionAtRestWithCustomerKey"
+            }
+        }
+
+    ]
+}

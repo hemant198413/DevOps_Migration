@@ -1,0 +1,183 @@
+parameters:
+  - name: dryRun
+    type: boolean
+  - name: componentDetails
+    type: object
+  - name: serviceConnection
+    type: string
+
+steps:
+- checkout: self
+- ${{ each c in parameters.componentDetails.components}}:
+  - ${{ each i in c.instances }}:
+    - ${{ if eq(c.scope, 'Management Group') }}:
+      - ${{ if parameters.dryRun }}:
+        # NOTE: `az deployment mg` sometimes accepts `subscription` flag
+        - task: AzureCLI@2
+          displayName: "Dry-run of ${{ c.name }} to mg ${{ i.managementGroupID }}"
+          inputs:
+            azureSubscription: ${{ parameters.serviceConnection }}
+            failOnStandardError: true
+            ${{ if i.templateConfigs[c.name][c.region].mg.templateParameters }}:
+              inlineScript: >-
+                az deployment mg what-if
+                --location ${{ c.region }}
+                --management-group-id ${{ i.managementGroupID }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/mg-template-params.json"
+                --parameters ${{ i.templateConfigs[c.name][c.region].mg.templateParameters }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/mg-template.json"
+                --only-show-errors
+            ${{ if not(i.templateConfigs[c.name][c.region].mg.templateParameters) }}:
+              inlineScript: >-
+                az deployment mg what-if
+                --location ${{ c.region }}
+                --management-group-id ${{ i.managementGroupID }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/mg-template-params.json"
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/mg-template.json"
+                --only-show-errors
+            scriptLocation: 'inlineScript'
+            scriptType: 'bash'
+      - ${{ if not(parameters.dryRun) }}:
+        # NOTE: `az deployment mg` sometimes accepts `subscription` flag
+        - task: AzureCLI@2
+          displayName: "Deploy ${{ c.name }} to mg ${{ i.managementGroupID }}"
+          inputs:
+            azureSubscription: ${{ parameters.serviceConnection }}
+            failOnStandardError: true
+            ${{ if i.templateConfigs[c.name][c.region].mg.templateParameters }}:
+              inlineScript: >-
+                az deployment mg create
+                --location ${{ c.region }}
+                --management-group-id ${{ i.managementGroupID }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/mg-template-params.json"
+                --parameters ${{ i.templateConfigs[c.name][c.region].mg.templateParameters }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/mg-template.json"
+                --only-show-errors
+            ${{ if not(i.templateConfigs[c.name][c.region].mg.templateParameters) }}:
+              inlineScript: >-
+                az deployment mg create
+                --location ${{ c.region }}
+                --management-group-id ${{ i.managementGroupID }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/mg-template-params.json"
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/mg-template.json"
+                --only-show-errors
+            scriptLocation: 'inlineScript'
+            scriptType: 'bash'
+    - ${{ if eq(c.scope, 'Subscription') }}:
+      - ${{ if parameters.dryRun }}:
+        - task: AzureCLI@2
+          displayName: "Dry-run of ${{ c.name }} to sub ${{ i.subscriptionID }}"
+          inputs:
+            azureSubscription: ${{ parameters.serviceConnection }}
+            failOnStandardError: true
+            ${{ if i.templateConfigs[c.name][c.region].sub.templateParameters }}:
+              inlineScript: >-
+                az deployment sub what-if
+                --location ${{ c.region }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/sub-template-params.json"
+                --parameters ${{ i.templateConfigs[c.name][c.region].sub.templateParameters }}
+                --subscription ${{ i.subscriptionID }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/sub-template.json"
+                --only-show-errors
+            ${{ if not(i.templateConfigs[c.name][c.region].sub.templateParameters) }}:
+              inlineScript: >-
+                az deployment sub what-if
+                --location ${{ c.region }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/sub-template-params.json"
+                --subscription ${{ i.subscriptionID }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/sub-template.json"
+                --only-show-errors
+            scriptLocation: 'inlineScript'
+            scriptType: 'bash'
+      - ${{ if not(parameters.dryRun) }}:
+        - task: AzureCLI@2
+          displayName: "Deploy ${{ c.name }} to sub ${{ i.subscriptionID }}"
+          inputs:
+            azureSubscription: ${{ parameters.serviceConnection }}
+            failOnStandardError: true
+            ${{ if i.templateConfigs[c.name][c.region].sub.templateParameters }}:
+              inlineScript: >-
+                az deployment sub create
+                --location ${{ c.region }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/sub-template-params.json"
+                --parameters ${{ i.templateConfigs[c.name][c.region].sub.templateParameters }}
+                --subscription ${{ i.subscriptionID }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/sub-template.json"
+                --only-show-errors
+            ${{ if not(i.templateConfigs[c.name][c.region].sub.templateParameters) }}:
+              inlineScript: >-
+                az deployment sub create
+                --location ${{ c.region }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/sub-template-params.json"
+                --subscription ${{ i.subscriptionID }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/sub-template.json"
+                --only-show-errors
+            scriptLocation: 'inlineScript'
+            scriptType: 'bash'
+    - ${{ if eq(c.scope, 'Resource Group') }}:
+      - ${{ if parameters.dryRun }}:
+        - task: AzureCLI@2
+          displayName: "Dry-run of ${{ c.name }} to sub ${{ i.subscriptionID }} (rg ${{ c.target }})"
+          inputs:
+            azureSubscription: ${{ parameters.serviceConnection }}
+            failOnStandardError: true
+            ${{ if i.templateConfigs[c.name][c.region].group.templateParameters }}:
+              inlineScript: >-
+                az deployment group what-if
+                --resource-group ${{ c.target }}
+                --mode ${{ c.mode }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/group-template-params.json"
+                --parameters ${{ i.templateConfigs[c.name][c.region].group.templateParameters }}
+                --subscription ${{ i.subscriptionId }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/group-template.json"
+                --only-show-errors
+            ${{ if not(i.templateConfigs[c.name][c.region].group.templateParameters) }}:
+              inlineScript: >-
+                az deployment group what-if
+                --resource-group ${{ c.target }}
+                --mode ${{ c.mode }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/group-template-params.json"
+                --subscription ${{ i.subscriptionId }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/group-template.json"
+                --only-show-errors
+            scriptLocation: 'inlineScript'
+            scriptType: 'bash'
+      - ${{ if not(parameters.dryRun) }}:
+        - task: AzureCLI@2
+          displayName: "Deploy ${{ c.name }} to sub ${{ i.subscriptionID }} (rg ${{ c.target }})"
+          inputs:
+            azureSubscription: ${{ parameters.serviceConnection }}
+            failOnStandardError: true
+            ${{ if i.templateConfigs[c.name][c.region].group.templateParameters }}:
+              inlineScript: >-
+                az deployment group create
+                --resource-group ${{ c.target }}
+                --mode ${{ c.mode }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/group-template-params.json"
+                --parameters ${{ i.templateConfigs[c.name][c.region].group.templateParameters }}
+                --subscription ${{ i.subscriptionId }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/group-template.json"
+                --only-show-errors
+            ${{ if not(i.templateConfigs[c.name][c.region].group.templateParameters) }}:
+              inlineScript: >-
+                az deployment group create
+                --resource-group ${{ c.target }}
+                --mode ${{ c.mode }}
+                --name "ado-cd-${{ c.name }}-$(Build.BuildNumber)"
+                --parameters "src/${{ c.componentFolder }}/${{ c.name }}/group-template-params.json"
+                --subscription ${{ i.subscriptionId }}
+                --template-file "src/${{ c.componentFolder }}/${{ c.name }}/group-template.json"
+                --only-show-errors
+            scriptLocation: 'inlineScript'
+            scriptType: 'bash'

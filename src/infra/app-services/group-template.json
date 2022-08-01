@@ -1,0 +1,284 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppNames": {
+            "type": "string",
+            "defaultValue": "realtimeservices"
+        },
+        "dnsSpokeResourceGroup": {
+            "defaultValue": "dns-spoke",
+            "type": "String"
+        },
+        "environment": {
+            "type": "string"
+        },
+        "existingSubnetName": {
+            "type": "string",
+            "defaultValue": "SubnetD"
+        },
+        "existingVirtualNetworkName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the existing Virtual Network."
+            }
+        },
+        "existingVirtualNetworkResourceGroupName": {
+            "type": "string"
+        },
+        "privateEndpointName": {
+            "type": "string"
+        },
+        "resourcetags": {
+            "type": "object"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "privateDnsZonesName": {
+            "type": "string"
+        },
+        "certificateThumbPrint": {
+            "type": "string"
+        },
+        "enabledDeploymentEnvironment": {
+            "type": "array",
+            "defaultValue": [
+                "preprod",
+                "prod"
+            ]
+        }
+    },
+    "variables": {
+        "webAppPrivateLink": "/subscriptions/1289fb92-7d96-43a6-8cc0-00655e6c8e3b/resourceGroups/privatelink-dns-hub/providers/Microsoft.Network/privateDnsZones/privatelink.azurewebsites.net"
+    },
+    "resources": [
+        {
+            "name": "[concat(parameters('webAppNames'),'-',parameters('environment'),'-plan')]",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "type": "Microsoft.Web/serverFarms",
+            "apiVersion": "2018-02-01",
+            "dependsOn": [],
+            "properties": {},
+            "location": "[parameters('location')]",
+            "sku": {
+                "capacity": 2,
+                "size": "P1v2",
+                "name": "P1v2",
+                "tier": "Standard"
+            },
+            "kind": "app"
+        },
+        {
+            "name": "[concat(parameters('webAppNames'),'-',parameters('environment'))]",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-02-01",
+            "dependsOn": [
+                "[concat(parameters('webAppNames'),'-',parameters('environment'),'-plan')]"
+            ],
+            "properties": {
+                "name": "[concat(parameters('webAppNames'),'-',parameters('environment'))]",
+                "serverfarmID": "[resourceId('Microsoft.Web/serverFarms',concat(parameters('webAppNames'),'-',parameters('environment'),'-plan'))]",
+                "clientCertEnabled": false,
+                "clientCertMode": "Optional",
+                "siteConfig": {
+                    "alwaysOn": true
+                }
+            },
+            "location": "[parameters('location')]",
+            "tags": {
+                "cost-center": "[parameters('resourcetags').costcenter]",
+                "owner-email": "[parameters('resourcetags').owneremail]",
+                "application" : "[parameters('resourcetags').application]",
+                "application-id": "[parameters('resourcetags').applicationid]",
+                "env": "[parameters('resourcetags').env]",
+                "version": "[parameters('resourcetags').version]",
+                "service": "[parameters('resourcetags').service]",
+                "resource-name":"[concat(parameters('webAppNames'),'-',parameters('environment'),'.web-sites')]"
+            },
+            "identity": {
+                "type": "SystemAssigned"
+            }
+        },
+        {
+            "name": "[concat(parameters('webAppNames'),'-',parameters('environment'),'/virtualNetwork')]",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2016-08-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', concat(parameters('webAppNames'),'-',parameters('environment')))]"
+            ],
+            "properties": {
+                "swiftSupported": "true",
+                "subnetResourceId": "[concat(resourceId(parameters('existingVirtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks', parameters('existingVirtualNetworkName')), '/subnets/',parameters('existingSubnetName'))]"
+            }
+        },
+        {
+            "name": "[concat(parameters('webAppNames'),'-',parameters('environment'),'/web')]",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2016-08-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', concat(parameters('webAppNames'),'-',parameters('environment')))]"
+            ],
+            "properties": {
+                "use32BitWorkerProcess": "false",
+                "clientAffinityEnabled": "false",
+                "http20Enabled": true,
+                "ftpsState": "FtpsOnly",
+                "alwaysOn": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "apiVersion": "2018-11-01",
+            "name": "[concat(parameters('webAppNames'),'-',parameters('environment'), '/', parameters('webAppNames'),'-',parameters('environment'),'.',parameters('privateDnsZonesName'))]",
+            "location": "East US 2",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', concat(parameters('webAppNames'),'-',parameters('environment')))]"
+            ],
+            "properties": {
+                "siteName": "[concat(parameters('webAppNames'),'-',parameters('environment'))]",
+                "hostNameType": "Verified",
+                "sslState": "SniEnabled",
+                "thumbprint": "[parameters('certificateThumbPrint')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('privateEndpointName'),'-',parameters('webAppNames'),'-',parameters('environment'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', concat(parameters('webAppNames'),'-',parameters('environment')))]"
+            ],
+            "properties": {
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "[parameters('privateEndpointName')]",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.Web/sites', concat(parameters('webAppNames'),'-',parameters('environment')))]",
+                            "groupIds": [
+                                "sites"
+                            ],
+                            "privateLinkServiceConnectionState": {
+                                "status": "Approved",
+                                "description": "Auto-approved",
+                                "actionsRequired": "None"
+                            }
+                        }
+                    }
+                ],
+                "manualPrivateLinkServiceConnections": [],
+                "subnet": {
+                    "id": "[concat(resourceId(parameters('existingVirtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks',  parameters('existingVirtualNetworkName')), '/subnets/SubnetC')]"
+                },
+                "customDnsConfigs": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "apiVersion": "2020-05-01",
+            "name": "[concat(parameters('privateEndpointName'),'-',parameters('webAppNames'),'-',parameters('environment'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', concat(parameters('privateEndpointName'),'-',parameters('webAppNames'),'-',parameters('environment')))]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "privatelink-azurewebsites-net",
+                        "properties": {
+                            "privateDnsZoneId": "[variables('webAppPrivateLink')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "microsoft.insights/autoscalesettings",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "apiVersion": "2015-04-01",
+            "name": "[concat(parameters('webAppNames'),'-',parameters('environment'),'-','autoscaler')]",
+            "location": "East US 2",
+            "properties": {
+                "profiles": [
+                    {
+                        "name": "Auto created scale condition",
+                        "capacity": {
+                            "minimum": "2",
+                            "maximum": "5",
+                            "default": "2"
+                        },
+                        "rules": [
+                            {
+                                "metricTrigger": {
+                                    "metricName": "CpuPercentage",
+                                    "metricNamespace": "microsoft.web/serverfarms",
+                                    "metricResourceUri": "[resourceId('Microsoft.Web/serverFarms',concat(parameters('webAppNames'),'-',parameters('environment'),'-plan'))]",
+                                    "timeGrain": "PT1M",
+                                    "statistic": "Average",
+                                    "timeWindow": "PT10M",
+                                    "timeAggregation": "Average",
+                                    "operator": "GreaterThan",
+                                    "threshold": 75,
+                                    "dimensions": []
+                                },
+                                "scaleAction": {
+                                    "direction": "Increase",
+                                    "type": "ChangeCount",
+                                    "value": "1",
+                                    "cooldown": "PT5M"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "enabled": true,
+                "name": "[concat(parameters('webAppNames'),'-',parameters('environment'),'-','autoscaler')]",
+                "targetResourceUri": "[resourceId('Microsoft.Web/serverFarms',concat(parameters('webAppNames'),'-',parameters('environment'),'-plan'))]",
+                "notifications": []
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "condition": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]",
+            "apiVersion": "2020-06-01",
+            "name": "privateDNsZonesARecord",
+            "resourceGroup": "[parameters('dnsSpokeResourceGroup')]",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "0.1.0.0",
+                    "resources": [
+                        {
+                            "type": "Microsoft.Network/privateDnsZones/CNAME",
+                            "apiVersion": "2018-09-01",
+                            "name": "[concat(parameters('privateDnsZonesName'),'/', parameters('webAppNames'),'-',parameters('environment'))]",
+                            "properties": {
+                                "ttl": 300,
+                                "cnameRecord": {
+                                    "cname": "[concat(parameters('webAppNames'),'-',parameters('environment'),'.privatelink.azurewebsites.net')]"
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outputs": {
+        "deploymentCondition": {
+            "type": "bool",
+            "value": "[contains(parameters('enabledDeploymentEnvironment'),parameters('environment'))]"
+        }
+    }
+}

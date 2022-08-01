@@ -1,0 +1,16 @@
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: quality_checks
+    displayName: 'Quality checks'
+    jobs:
+    - job:
+      displayName: 'Validate ARM templates'
+      steps:
+      - template: steps/validate-templates.yml
+        parameters:
+          validationManagementGroup: "RayTestMG"
+          validationSubscription: "hips-cdp-dev"
+          validationResourceGroup: "ado-ci-validation"
+          validateRegion: "East US 2"

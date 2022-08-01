@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "aksClusterName": {
+      "value": "aks-hips-cdp"
+    },
+    "dnsPrefix": {
+      "value": "dnsakshipscdp18"
+    },
+    // Placeholder value needs to be present for validation
+    "engineerADGroupPrincipalId": {
+      "value": "7e252e01-75d2-44a4-baed-eeea715784c1"
+    },
+    "existingVirtualNetworkName": {
+      "value": "vnet-hips-cdp-dev-eastus2"
+    },
+    "existingVirtualNetworkResourceGroup": {
+      "value": "networking-spoke-eastus2"
+    },
+    "existingSubnetName": {
+      "value": "SubnetC"
+    },
+    "dnsServiceIP": {
+      "value": "100.64.0.30"
+    },
+    "environment": {
+      "value": "dev"
+    },
+    "resourcetags": {
+      "value": {
+        "applicationid": "hips",
+        "application": "hips-cdp",
+        "costcenter": "96200",
+        "env": "[parameters('environment')]",
+        "owneremail": "",
+        "service": "hips-cdp",
+        "version": "V1.1"
+      }
+    },
+    //Place holder to override this value.
+    "tenantID": {
+      "value": "93c5fcb5-2df6-4550-9a10-cd35f285cf7c"
+    },
+    "logWorkspacesName": {
+      "value": "app-log-analytics-eastus2-sttu2yxqow6r6"
+    },
+    "keyEncryptionKeyURL": {
+      "value": "URL_placeholdervalue"
+    },
+    "diskEncryptionSets": {
+      "value": "aks-disk-encryption-set"
+    }
+  }
+}

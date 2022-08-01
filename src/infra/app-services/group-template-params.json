@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "existingVirtualNetworkResourceGroupName": {
+            "value": "networking-spoke-eastus2"
+        },
+        "existingVirtualNetworkName": {
+            "value": "vnet-hips-cdp-dev-eastus2"
+        },
+        "privateEndpointName": {
+            "value": "private-link"
+        },
+        "resourcetags": {
+            "value": {
+                "applicationid": "hips",
+                "application": "hips-cdp",
+                "costcenter": "96200",
+                "env": "[parameters('environment')]",
+                "owneremail": "",
+                "service": "app-services",
+                "version": "V1.1"
+            }
+        },
+        "environment": {
+            "value": "preprod"
+        },
+        "privateDnsZonesName": {
+            "value": "redpoint.preprod.azure.mskcc.org"
+        },
+        "certificateThumbPrint": {
+            "value": ""
+        }
+    }
+}
