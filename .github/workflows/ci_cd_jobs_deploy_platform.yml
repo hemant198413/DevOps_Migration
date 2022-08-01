@@ -1,0 +1,308 @@
+name: ci_cd_jobs_deploy_platform
+on:
+  workflow_call:
+    inputs:
+      dryRun:
+        required: false
+        type: boolean
+      targetEnv:
+        required: false
+        type: string
+      serviceConnection:
+        required: false
+        type: string
+      userSubscriptions:
+        required: false
+        type: string
+jobs:
+  storage:
+    name: Azure Storage Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: storage
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  service_bus:
+    name: Service Bus Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: service-bus
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  redis_cache:
+    name: Redis Cache deployment Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: redis
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  sqlserver_deployment:
+    name: Sql Server Pool and HyperScale Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: sql-pool-db
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#           - name: sql-hyper-db
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  web_app:
+    name: App Service Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: app-services
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  key_vault:
+    name: Key Vault Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: key-vault
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  data_lake_Gen2_storage:
+    name: DataLake Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: data-lake
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  alerts:
+    name: Alerts and ActionGroup Deployment
+    needs:
+    - service_bus
+    - redis_cache
+    - sqlserver_deployment
+    - key_vault
+    - web_app
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: alerts
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  alerts_dnszone:
+    name: dns Alerts and ActionGroup Deployment
+    needs:
+    - alerts
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: dns-alerts
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: dns-spoke
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  load_balancer:
+    name: Load Balancer Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: vm-load-balancer
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus2
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"
+  azure_maps:
+    name: Maps Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ parameters.targetEnv }}
+    if: github.RUN_NUMBER == 1
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: download artifact
+      uses: actions/download-artifact@v2
+#     # section was not transformed because it contains unsupported usage of the `each` syntax
+#     - path: "../steps/deploy-arm-template.yml"
+#       parameters:
+#         componentDetails:
+#           components:
+#           - name: maps
+#             scope: Resource Group
+#             instances:
+#             - "${{ fromJSON(inputs.userSubscriptions) }}"
+#             mode: Incremental
+#             region: eastus
+#             target: hips-cdp-eastus2
+#             componentFolder: infra
+#         dryRun: "${{ inputs.dryRun }}"
+#         serviceConnection: "${{ inputs.serviceConnection }}"

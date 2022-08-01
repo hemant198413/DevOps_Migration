@@ -1,0 +1,101 @@
+name: ci_cd_steps_validate_templates
+inputs:
+  validationManagementGroup:
+    required: false
+    type: string
+  validationSubscription:
+    required: false
+    type: string
+  validationResourceGroup:
+    required: false
+    type: string
+  validateRegion:
+    required: false
+    type: string
+runs:
+  using: composite
+  steps:
+  - name: Validate templates
+    uses: Azure/login@v1
+    with:
+      creds: "${{ secrets.AZURE_CREDENTIALS }}"
+  - name: Validate templates
+    run: |-
+      SOURCE_FOLDER="./*"
+      failureCount=0
+      totalCount=0
+      OverallResult=true
+      for d in `find $SOURCE_FOLDER -maxdepth 0 -mindepth 0 -type d`
+      do
+        if [ -e "$d/mg-template.json" ]
+        then
+          if [ -e "$d/mg-template-params.json" ]
+          then
+              printf "Directory: $d\n"
+              let "totalCount=totalCount+1"
+              validateResult=`az deployment mg validate --name "preview-ado-cd-${{ github.run_number }}" --management-group-id "${{ inputs.validationManagementGroup }}" --location "${{ inputs.validateRegion }}" --template-file $d/mg-template.json --parameters $d/mg-template-params.json --output table | awk '{print $1}'`
+              echo $validateResult
+              result=`echo $validateResult | grep Succeeded|wc -l`
+              if [ $result -ne 1 ]
+              then
+                echo 'Validation-->**Failed**'
+                OverallResult=false
+                let "failureCount=failureCount+1"
+              fi
+          else
+            printf 'no template-params file found.\n'
+          fi
+        else
+          printf 'no template file found.\n'
+        fi
+        if [ -e "$d/sub-template.json" ]
+        then
+          if [ -e "$d/sub-template-params.json" ]
+          then
+            printf "Directory: $d\n"
+            let "totalCount=totalCount+1"
+            validateResult=`az deployment sub validate --name "preview-ado-cd-${{ github.run_number }}" --location "${{ inputs.validateRegion }}" --template-file $d/sub-template.json --parameters $d/sub-template-params.json --subscription "${{ inputs.validationSubscription }}" --output table | awk '{print $1}'`
+            echo $validateResult
+            result=`echo $validateResult | grep Succeeded|wc -l`
+            if [ $result -ne 1 ]
+            then
+                echo 'Validation-->**Failed**'
+                OverallResult=false
+                let "failureCount=failureCount+1"
+            fi
+          else
+            printf 'no template-params file found.\n'
+          fi
+        else
+          printf 'no template file found.\n'
+        fi
+        if [ -e "$d/group-template.json" ]
+        then
+          if [ -e "$d/group-template-params.json" ]
+          then
+            printf "Directory: $d\n"
+            let "totalCount=totalCount+1"
+            validateResult=`az deployment group validate --name "ci-${{ github.run_number }}" --resource-group ${{ inputs.validationResourceGroup }} --mode Incremental --template-file $d/group-template.json --parameters $d/group-template-params.json --subscription "${{ inputs.validationSubscription }}" --output table | awk '{print $1}'`
+            echo $validateResult
+            result=`echo $validateResult | grep Succeeded|wc -l`
+            if [ $result -ne 1 ]
+            then
+                echo 'Validation-->**Failed**'
+                OverallResult=false
+                let "failureCount=failureCount+1"
+            fi
+          else
+            printf 'no template-params file found.\n'
+          fi
+        else
+          printf 'no template file found.\n'
+        fi
+      done
+
+      if [ "$OverallResult" = false ]
+      then
+          echo 'Out of -' $totalCount ' template validation failed for -' $failureCount
+          exit 1
+      fi
+      echo 'Run validation sucessfully on -' $totalCount  ' templates.'
+    shell: bash
